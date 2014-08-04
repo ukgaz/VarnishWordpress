@@ -4,7 +4,7 @@ sub vcl_recv {
   # Many requests contain Accept-Encoding HTTP headers. We standardize and remove these when unnecessary to make it easier to cache requests
   if (req.http.Accept-Encoding) {
     # If the request URL has any of these extensions, remove the Accept-Encoding header as it is meaningless
-    if (req.url ~ ".(gif|jpg|jpeg|swf|flv|mp3|mp4|pdf|ico|png|gz|tgz|bz2)(?.*|)$") {
+    if (req.url ~ ".(gif|jpg|jpeg|swf|flv|mp3|mp4|pdf|ico|png|gz|tgz|bz2)$") {
       remove req.http.Accept-Encoding;
     # If the Accept-Encoding contains 'gzip' standardize it.
     } elsif (req.http.Accept-Encoding ~ "gzip") {
@@ -19,10 +19,10 @@ sub vcl_recv {
   }
  
   # Many requests contain cookies on requests for resources which cookies don't matter -- such as static images or documents.
-  if (req.url ~ ".(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(?.*|)$") {
+  if (req.url ~ ".(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)$") {
     # Remove cookies from these resources, and remove any attached query strings.
     unset req.http.cookie;
-    set req.url = regsub(req.url, "?.*$", "");
+    set req.url = regsub(req.url, "?.$", "");
   }
  
   # Certain cookies (such as for Google Analytics) are client-side only, and don't matter to our web application.
@@ -58,7 +58,7 @@ sub vcl_fetch {
   }
  
   # If the URL is for one of static images or documents, we always want them to be cached.
-  if (req.url ~ ".(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)(?.*|)$") {
+  if (req.url ~ ".(gif|jpg|jpeg|swf|css|js|flv|mp3|mp4|pdf|ico|png)$") {
     # Remove cookies...
     unset beresp.http.set-cookie;
     # Cache the page for 365 days.
